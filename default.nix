@@ -2,7 +2,7 @@
   extraPlugins = [
     (pkgs.vimUtils.buildVimPlugin {
       name = "project-todo.nvim";
-      src = ../.;
+      src = ./.;
     })
   ];
   extraConfigLua = ''
