@@ -1,4 +1,6 @@
 local Todo = require "project-todo.todo"
+local Settings = require "project-todo.settings"
+local State = require "project-todo.state"
 
 ---@class project-todo.app
 ---@field settings project-todo.settings
@@ -10,25 +12,27 @@ App.__index = App
 ---@type project-todo.app
 local app
 
--- ---@return project-todo.app
--- function App.get()
---   if app then
---     return app
---   end
---   local settings = Settings:new()
---   local state = State:new(settings.save_dir)
---   return App:new(settings, state)
--- end
-
+---@return project-todo.app
+function App.get()
+  if app then
+    return app
+  end
+  local settings = Settings:new()
+  local state = State:new(settings.save_dir)
+  return App:new(settings, state)
+end
 
 ---@param settings project-todo.settings
 ---@param state project-todo.state
 ---@return project-todo.app
 function App:new(settings, state)
-  return setmetatable({
+  app = setmetatable({
     settings = settings,
+    ---TODO: update application to not require state, as it would make it difficult
+    --- to support multiple scopes at once
     state = state
   }, self)
+  return app
 end
 
 function App:init()
