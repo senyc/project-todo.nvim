@@ -1,5 +1,5 @@
 local Path = require('project-todo.path')
-local mode = 448
+local mode = 438
 
 ---@class project-todo.state
 ---@field save_dir string
@@ -17,7 +17,7 @@ end
 ---Creates the save directory if it does not exist
 function State:ensure_exists()
   if vim.uv.fs_stat(self.save_dir) == nil then
-    assert(vim.uv.fs_mkdir(self.save_dir, mode))
+    assert(vim.fn.mkdir(self.save_dir, "p"))
   end
 end
 
