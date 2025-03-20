@@ -1,4 +1,4 @@
-local Path = require('project-todo.path')
+local Path = require("project-todo.path")
 local mode = 438
 
 ---@class project-todo.state
@@ -21,7 +21,7 @@ function State:ensure_exists()
   end
 end
 
----@param scope string
+---@param scope string the encoded scope (using Path.encode)
 ---@return project-todo.todo[]? data, string? error
 function State:get(scope)
   local path       = Path.join(self.save_dir, scope)
@@ -56,7 +56,7 @@ function State:get(scope)
   return result, nil
 end
 
----@param scope string
+---@param scope string encoded scope (using Path.encode)
 ---@param contents project-todo.todo[]
 function State:put(scope, contents)
   local path = Path.join(self.save_dir, scope)

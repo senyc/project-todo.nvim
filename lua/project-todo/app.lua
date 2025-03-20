@@ -1,5 +1,6 @@
 local Todo = require "project-todo.todo"
 local Settings = require "project-todo.settings"
+local Path = require "project-todo.path"
 local State = require "project-todo.state"
 
 ---@class project-todo.app
@@ -47,10 +48,7 @@ function App:get_scope()
   local pwd = vim.uv.cwd()
   assert(pwd)
   -- Gets the base scope of the user's current project
-  local base_scope = string.gsub(pwd, vim.fn.expand("$HOME"), "")
-  local trimmed_scope = string.sub(base_scope, 2)
-  local scope = string.gsub(trimmed_scope, "/", "_")
-  return scope
+  return Path.encode(pwd)
 end
 
 ---@param window project-todo.window
