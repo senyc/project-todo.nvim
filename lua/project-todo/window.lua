@@ -8,19 +8,16 @@ Window.__index = Window
 
 ---@return vim.api.keyset.win_config
 function Window:default_opts()
-  local gheight = vim.api.nvim_list_uis()[1].height
-  local gwidth = vim.api.nvim_list_uis()[1].width
   local width = 60
   local height = 12
-  ---@type vim.api.keyset.win_config
   return {
+    style = "minimal",
     relative = "editor",
     width = width,
     height = height,
-    row = (gheight - height) * 0.5,
-    col = (gwidth - width) * 0.5,
-    border = 'single',
-    style = 'minimal'
+    row = (vim.o.lines - height) / 2,  -- Center vertically
+    col = (vim.o.columns - width) / 2, -- Center horizontally
+    border = "rounded",
   }
 end
 
@@ -52,7 +49,7 @@ function Window:populate(entries)
   ---@param entry project-todo.todo
   ---@return string line
   local function to_line(entry)
-    return entry.type .. ': ' .. entry.title
+    return entry.type .. ": " .. entry.title
   end
 
   ---@type string[]

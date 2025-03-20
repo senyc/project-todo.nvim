@@ -62,6 +62,15 @@ end
 ---This will add the bufwrite auto command to keep the state in sync with the contents of the window
 ---@param window project-todo.window
 function App:register_window(window)
+  -- On resize re-center the window
+  vim.api.nvim_create_autocmd({ "VimResized" }, {
+    buffer = window.buf_id,
+    callback = function()
+      local win_opts = window:default_opts()
+      vim.api.nvim_win_set_config(window.win_id, win_opts)
+    end,
+  })
+  -- On close, save the buffer contents to state (filesystem)
   vim.api.nvim_create_autocmd({ "BufLeave", "WinLeave" }, {
     buffer = window.buf_id,
     callback = function()
