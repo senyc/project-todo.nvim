@@ -1,7 +1,6 @@
 ---@diagnostic disable: undefined-field
 local Todo = require "project-todo.todo"
 
-
 describe("Todo management", function()
   local todo
 
@@ -33,7 +32,6 @@ describe("Todo management", function()
     end)
   end)
 end)
-
 
 describe("Todo parsing", function()
   describe("#from_line", function()
