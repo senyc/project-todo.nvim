@@ -9,7 +9,9 @@
         "${3rd}/busted/library",
         "${3rd}/luv/library"
     ],
-    "completion.callSnippet": "Disable",
-    "completion.keywordSnippet": "Disable"
+    "Lua.format.defaultConfig": {
+      "indent_style": "space",
+      "indent_size": "2",
+      "quote_style": "double"
+  }
 }
-
