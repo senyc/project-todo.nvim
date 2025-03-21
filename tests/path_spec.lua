@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-field
 local Path = require "project-todo.path"
 
 describe("Path.join", function()

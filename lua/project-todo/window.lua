@@ -2,21 +2,19 @@
 ---@field opts vim.api.keyset.win_config
 ---@field buf_id integer
 ---@field win_id integer
----@field settings project-todo.settings
 local Window = {}
 Window.__index = Window
 
 ---@return vim.api.keyset.win_config
-function Window:default_opts()
-  local width = 60
-  local height = 12
+---@param settings project-todo.settings
+function Window:default_opts(settings)
   return {
     style = "minimal",
     relative = "editor",
-    width = width,
-    height = height,
-    row = (vim.o.lines - height) / 2,  -- Center vertically
-    col = (vim.o.columns - width) / 2, -- Center horizontally
+    width = settings.width,
+    height = settings.height,
+    row = (vim.o.lines - settings.height) / 2,  -- Center vertically
+    col = (vim.o.columns - settings.width) / 2, -- Center horizontally
     border = "rounded",
   }
 end
@@ -26,9 +24,8 @@ end
 ---@return project-todo.window
 function Window:new(settings, opts)
   return setmetatable({
-    opts = opts or self:default_opts(),
     buf_id = nil,
-    settings = settings,
+    opts = opts or self:default_opts(settings),
     win_id = nil,
   }, self)
 end

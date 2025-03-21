@@ -4,11 +4,8 @@ local State = require "project-todo.state"
 local App = require "project-todo.app"
 
 vim.api.nvim_create_user_command("ProjectTodo", function()
-  local settings = Settings:new()
-  local win = Window:new(settings)
-  local state = State:new(settings.save_dir)
-  state:ensure_exists()
-  local app = App:new(settings, state)
+  local app = App.get()
+  local win = Window:new(app.settings)
   win:open()
   app:populate_window(win)
   app:register_window(win)

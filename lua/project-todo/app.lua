@@ -13,6 +13,7 @@ App.__index = App
 ---@type project-todo.app
 local app
 
+---Returns application singleton or creates one if one doesn't already exist
 ---@return project-todo.app
 function App.get()
   if app then
@@ -20,13 +21,15 @@ function App.get()
   end
   local settings = Settings:new()
   local state = State:new(settings.save_dir)
-  return App:new(settings, state)
+  state:ensure_exists()
+  return App:_new(settings, state)
 end
 
+---This should not be called directly, please call App.get() instead
 ---@param settings project-todo.settings
 ---@param state project-todo.state
 ---@return project-todo.app
-function App:new(settings, state)
+function App:_new(settings, state)
   app = setmetatable({
     settings = settings,
     ---TODO: update application to not require state, as it would make it difficult
@@ -66,7 +69,7 @@ function App:register_window(window)
   vim.api.nvim_create_autocmd({ "VimResized" }, {
     buffer = window.buf_id,
     callback = function()
-      local win_opts = window:default_opts()
+      local win_opts = window:default_opts(self.settings)
       vim.api.nvim_win_set_config(window.win_id, win_opts)
     end,
   })
@@ -87,6 +90,12 @@ function App:populate_window(window)
   if todos then
     window:populate(todos)
   end
+end
+
+---Updates the application configuration in-place
+---@param opts project-todo.settings
+function App:update(opts)
+  self.settings:update(opts)
 end
 
 return App

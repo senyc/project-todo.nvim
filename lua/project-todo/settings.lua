@@ -2,8 +2,13 @@
 local Settings = {}
 
 ---@class project-todo.settings
+---@field save_dir string
+---@field width number
+---@field height number
 local DEFAULT_SETTINGS = {
   save_dir = vim.fn.stdpath("data") .. "/" .. "project-todo/",
+  width = 60,
+  height = 12
 }
 
 Settings.__index = function(tbl, key)
