@@ -47,6 +47,7 @@ end
 ---@return string
 function App:get_scope()
   --TODO support git as the base instead of the user home directory
+  -- or at the very least allow for that as an option
   ---@type string?
   local pwd = vim.uv.cwd()
   assert(pwd)

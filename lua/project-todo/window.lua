@@ -31,6 +31,9 @@ function Window:new(settings, opts)
 end
 
 function Window:open()
+  if self:is_open() then
+    return
+  end
   self.buf_id = vim.api.nvim_create_buf(false, true) -- No file, scratch buffer
   self.win_id = vim.api.nvim_open_win(self.buf_id, true, self.opts)
 
@@ -40,6 +43,23 @@ function Window:open()
 
   vim.api.nvim_set_option_value("modifiable", true, { buf = self.buf_id })
 end
+
+function Window:close()
+  vim.api.nvim_win_close(self.win_id, false)
+  self.win_id = nil
+  self.buf_id = nil
+end
+
+---@return boolean
+function Window:is_open()
+  return self.win_id ~= nil
+end
+
+---@return boolean
+function Window:is_closed()
+  return not self:is_open()
+end
+
 
 ---@param entries project-todo.todo[]
 function Window:populate(entries)
