@@ -1,6 +1,8 @@
 local Path = require("project-todo.path")
 local mode = 438
 
+---@alias project-todo.todo_data {  title: string, type: string }
+
 ---@class project-todo.state
 ---@field save_dir string
 local State = {}
@@ -22,7 +24,7 @@ function State:ensure_exists()
 end
 
 ---@param scope string the encoded scope (using Path.encode)
----@return project-todo.todo[]? data, string? error
+---@return project-todo.todo_data[]? data, string? error
 function State:get(scope)
   local path       = Path.join(self.save_dir, scope)
   ---@type uv.fs_stat.result|nil
@@ -57,7 +59,7 @@ function State:get(scope)
 end
 
 ---@param scope string encoded scope (using Path.encode)
----@param contents project-todo.todo[]
+---@param contents project-todo.todo_data[]
 function State:put(scope, contents)
   local path = Path.join(self.save_dir, scope)
   local fd, err = vim.uv.fs_open(path, "w", mode)
@@ -76,6 +78,20 @@ function State:put(scope, contents)
     return nil, err
   end
   assert(vim.uv.fs_close(fd))
+end
+
+---@param scope string encoded scope (using Path.encode)
+---@param contents project-todo.todo_data[]
+---@return string? error
+function State:add(scope, contents)
+  local todos, err = self:get(scope)
+  if err then
+    return err
+  end
+  assert(todos)
+  local new_items = vim.list_extend({}, todos)
+  vim.list_extend(new_items, contents)
+  self:put(scope, new_items)
 end
 
 ---@param scope string

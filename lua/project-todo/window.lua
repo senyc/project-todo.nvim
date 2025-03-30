@@ -5,6 +5,7 @@
 local Window = {}
 Window.__index = Window
 
+--- Gets default win options to keep the screen centered
 ---@return vim.api.keyset.win_config
 ---@param settings project-todo.settings
 function Window:default_opts(settings)
@@ -44,10 +45,19 @@ function Window:open()
   vim.api.nvim_set_option_value("modifiable", true, { buf = self.buf_id })
 end
 
-function Window:close()
-  vim.api.nvim_win_close(self.win_id, false)
+--- Releases win_id and buf_id without closing the buffer
+--- this should be used after the window has been closed
+function Window:release()
+  if self:is_closed() then return end
   self.win_id = nil
   self.buf_id = nil
+end
+
+function Window:close()
+  if self:is_closed() then return end
+
+  vim.api.nvim_win_close(self.win_id, false)
+  self:release()
 end
 
 ---@return boolean
@@ -60,17 +70,17 @@ function Window:is_closed()
   return not self:is_open()
 end
 
-
----@param entries project-todo.todo[]
-function Window:populate(entries)
-  ---@param entry project-todo.todo
-  ---@return string line
-  local function to_line(entry)
-    return entry.type .. ": " .. entry.title
+--- Adds todo items to the given buffer
+---@param todos project-todo.todo_data[]
+function Window:populate_todos(todos)
+  ---@param todo project-todo.todo_data
+  ---@return string? line
+  local function to_line(todo)
+      return todo.type .. ": " .. todo.title
   end
 
   ---@type string[]
-  vim.api.nvim_buf_set_lines(self.buf_id, 0, -1, true, vim.tbl_map(to_line, entries))
+  vim.api.nvim_buf_set_lines(self.buf_id, 0, -1, true, vim.tbl_map(to_line, todos))
 end
 
 ---Will read and return all current items in the window's buffer

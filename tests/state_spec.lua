@@ -1,5 +1,5 @@
-local State = require('project-todo.state')
-local Settings = require('project-todo.settings')
+local State = require("project-todo.state")
+local Settings = require("project-todo.settings")
 local Todo = require("project-todo.todo")
 
 local save_dir = "./tmp"
@@ -33,8 +33,8 @@ describe("State", function()
     local _, err   = state:put("test", { todo, todo_two })
     assert(err == nil, err)
     local data = state:get("test")
-    assert(data and data[1].title == 'do stuff')
-    assert(data and data[2].title == 'do stuff two')
+    assert(data and data[1].title == "do stuff")
+    assert(data and data[2].title == "do stuff two")
   end)
 
   it("Deletes state items", function()
@@ -43,5 +43,19 @@ describe("State", function()
     local _, err = state:put("test", { todo })
     assert(err == nil, err)
     assert(state:delete("test") == nil)
+  end)
+
+  it("Adds to state items", function()
+    local state  = State:new(settings.save_dir)
+    local todo   = Todo:new("do stuff")
+    local _, err = state:put("test", { todo })
+    assert(err == nil, err)
+    local todo2 = Todo:new("do stuff again")
+    assert(state:add("test", { todo2 }) == nil)
+
+    local updated_state = state:get("test")
+    -- make sure that second todo is appended after the first
+    assert.are.same(updated_state[1], todo)
+    assert.are.same(updated_state[2], todo2)
   end)
 end)

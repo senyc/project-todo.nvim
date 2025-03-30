@@ -46,26 +46,59 @@ end
 --- Sanitizes the user's current directory into a sanitized string
 ---@return string
 function App:get_scope()
-  --TODO support git as the base instead of the user home directory
-  -- or at the very least allow for that as an option
   ---@type string?
   local pwd = vim.uv.cwd()
   assert(pwd)
-  -- Gets the base scope of the user's current project
   return Path.encode(pwd)
 end
 
+--- Sanitizes the user's current directory into a sanitized string
+---@return string
+function App:get_completed_scope()
+  ---@type string?
+  local pwd = vim.uv.cwd()
+  assert(pwd)
+  return Path.encode("complete" .. pwd)
+end
+
+--- Will add any complete types to "done" state, and replace all
+--- incomplete todos with window contents
 ---@param window project-todo.window
 function App:save_window_to_state(window)
   local lines = window:read_lines()
   local todos = Todo.from_lines(lines)
-  local scope = self:get_scope()
-  self.state:put(scope, todos)
+  local incomplete_todos = vim.tbl_filter(function(todo) return todo.type ~= "DONE" end, todos)
+  local complete_todos = vim.tbl_filter(function(todo) return todo.type == "DONE" end, todos)
+  -- Replaces incomplete items since the buffer is displaying all of them
+  self.state:put(self:get_scope(), incomplete_todos)
+  -- Appends completed items (so we don't replace existing completed items
+  if #complete_todos > 0 then
+    self.state:add(self:get_completed_scope(), complete_todos)
+  end
+end
+
+--- Will add any non-complete types to state, and replace all completed tasks
+--- with window contents
+---@param window project-todo.window
+function App:save_complete_window_to_state(window)
+  local lines = window:read_lines()
+  local todos = Todo.from_lines(lines)
+  local incomplete_todos = vim.tbl_filter(function(todo) return todo.type ~= "DONE" end, todos)
+  local complete_todos = vim.tbl_filter(function(todo) return todo.type == "DONE" end, todos)
+
+  -- Replaces complete items since the buffer is displaying all of them
+  self.state:put(self:get_completed_scope(), complete_todos)
+
+  -- Appends incompleted items (so we don't replace existing incomplete items
+  if #incomplete_todos > 0 then
+    self.state:add(self:get_scope(), incomplete_todos)
+  end
 end
 
 ---This will add the bufwrite auto command to keep the state in sync with the contents of the window
 ---@param window project-todo.window
-function App:register_window(window)
+---@param type "complete" | "incomplete"
+function App:register_window(window, type)
   -- On resize re-center the window
   vim.api.nvim_create_autocmd({ "VimResized" }, {
     buffer = window.buf_id,
@@ -74,22 +107,35 @@ function App:register_window(window)
       vim.api.nvim_win_set_config(window.win_id, win_opts)
     end,
   })
-  -- On close, save the buffer contents to state (filesystem)
-  vim.api.nvim_create_autocmd({ "BufLeave", "WinLeave" }, {
+
+  -- On close, save the buffer contents to state
+  vim.api.nvim_create_autocmd({ "BufLeave" }, {
     buffer = window.buf_id,
     callback = function()
-      self:save_window_to_state(window)
+      if type == "incomplete" then
+        self:save_window_to_state(window)
+      else
+        self:save_complete_window_to_state(window)
+      end
+      window:release()
     end
   })
 end
 
 ---This will populate the given window with state
 ---@param window project-todo.window
-function App:populate_window(window)
-  local scope = self:get_scope()
-  local todos = self.state:get(scope)
-  if todos then
-    window:populate(todos)
+---@param show_complete? boolean
+function App:populate_window(window, show_complete)
+  if show_complete then
+    local complete_todos = self.state:get(self:get_completed_scope())
+    if complete_todos then
+      window:populate_todos(complete_todos)
+    end
+  else
+    local incomplete_todos = self.state:get(self:get_scope())
+    if incomplete_todos then
+      window:populate_todos(incomplete_todos)
+    end
   end
 end
 

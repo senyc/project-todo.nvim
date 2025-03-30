@@ -15,7 +15,7 @@ end
 
 ---@return boolean
 function Todo:is_complete()
-  return self.type == 'DONE'
+  return not self.type and self.type == 'DONE'
 end
 
 ---@param s string?
