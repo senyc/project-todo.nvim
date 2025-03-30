@@ -76,3 +76,77 @@ describe("Todo parsing", function()
     end)
   end)
 end)
+
+describe("Todo from line", function()
+  it("should sanitize the todo with lua commentstring", function()
+    local line = "-- TODO: this is a todo item"
+    local sanitized_line = Todo.sanitize_todo_line(line)
+    assert(sanitized_line)
+    local todo = Todo.from_line(sanitized_line)
+    assert.equals("this is a todo item", todo.title)
+    assert.equals("TODO", todo.type)
+  end)
+
+  it("should sanitize the todo with lua triple commentstring", function()
+    local line = "--- TODO: this is a todo item"
+    local sanitized_line = Todo.sanitize_todo_line(line)
+    assert(sanitized_line)
+    local todo = Todo.from_line(sanitized_line)
+    assert.equals("this is a todo item", todo.title)
+    assert.equals("TODO", todo.type)
+  end)
+
+  it("should sanitize the todo with c-style comments", function()
+    local line = "// TODO: this is a todo item"
+    local sanitized_line = Todo.sanitize_todo_line(line)
+    assert(sanitized_line)
+    local todo = Todo.from_line(sanitized_line)
+    assert.equals("this is a todo item", todo.title)
+    assert.equals("TODO", todo.type)
+  end)
+
+  it("should sanitize the todo with hash comments", function()
+    local line = "# TODO: this is a todo item"
+    local sanitized_line = Todo.sanitize_todo_line(line)
+    assert(sanitized_line)
+    local todo = Todo.from_line(sanitized_line)
+    assert.equals("this is a todo item", todo.title)
+    assert.equals("TODO", todo.type)
+  end)
+
+  it("should sanitize the done todo with lua commentstring", function()
+    local line = "-- DONE: this is a todo item"
+    local sanitized_line = Todo.sanitize_todo_line(line)
+    assert(sanitized_line)
+    local todo = Todo.from_line(sanitized_line)
+    assert.equals("this is a todo item", todo.title)
+    assert.is.truthy(todo:is_complete())
+  end)
+
+  it("should sanitize the todo with lua triple commentstring", function()
+    local line = "--- DONE: this is a todo item"
+    local sanitized_line = Todo.sanitize_todo_line(line)
+    assert(sanitized_line)
+    local todo = Todo.from_line(sanitized_line)
+    assert.equals("this is a todo item", todo.title)
+    assert.is.truthy(todo:is_complete())
+  end)
+
+  it("should sanitize the todo with c-style comments", function()
+    local line = "// DONE: this is a todo item"
+    local sanitized_line = Todo.sanitize_todo_line(line)
+    assert(sanitized_line)
+    local todo = Todo.from_line(sanitized_line)
+    assert.equals("this is a todo item", todo.title)
+    assert.is.truthy(todo:is_complete())
+  end)
+
+  it("should sanitize the todo with hash comments", function()
+    local line = "# DONE: this is a todo item"
+    local sanitized_line = Todo.sanitize_todo_line(line)
+    assert(sanitized_line)
+    local todo = Todo.from_line(sanitized_line)
+    assert.equals("this is a todo item", todo.title)
+    assert.is.truthy(todo:is_complete())
+  end)
+end)

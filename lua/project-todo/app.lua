@@ -32,7 +32,6 @@ end
 function App:_new(settings, state)
   app = setmetatable({
     settings = settings,
-    ---TODO: update application to not require state, as it would make it difficult
     --- to support multiple scopes at once
     state = state
   }, self)
@@ -143,6 +142,28 @@ end
 ---@param opts project-todo.settings
 function App:update(opts)
   self.settings:update(opts)
+end
+
+--- This will convert the line the user is on to a todo item and add to state
+--- then it will delete the current line (without saving the buffer)
+---@return string? error
+function App:write_current_line_to_scope()
+  local curr_line = vim.api.nvim_get_current_line()
+  local todo_line = Todo.sanitize_todo_line(curr_line)
+
+  if not todo_line then return "unable to get todo line" end
+
+  local todo = Todo.from_line(todo_line)
+  if not todo then
+    return "no todo found"
+  end
+
+  if todo:is_complete() then
+    self.state:add(self:get_completed_scope(), { todo })
+  else
+    self.state:add(self:get_scope(), { todo })
+  end
+  vim.api.nvim_del_current_line()
 end
 
 return App

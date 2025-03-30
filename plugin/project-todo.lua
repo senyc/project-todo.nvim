@@ -15,7 +15,6 @@ local App = require "project-todo.app"
 ---@field mods? string
 ---@field smods table
 
-
 local app = App.get()
 local win = Window:new(app.settings)
 
@@ -23,6 +22,10 @@ vim.api.nvim_create_user_command("ProjectTodo",
   ---@param args project-todo.vim.user_command
   function(args)
     local action = args.fargs[1] or "incomplete"
+    if action == "comment" then
+      app:write_current_line_to_scope()
+      return
+    end
     if win:is_open() then
       -- This also runs the buf close aucmds
       win:close()
