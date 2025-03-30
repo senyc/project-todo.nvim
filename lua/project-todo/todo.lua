@@ -9,13 +9,13 @@ Todo.__index = Todo
 function Todo:new(title, type)
   return setmetatable({
     title = title,
-    type = type or 'TODO'
+    type = type or "TODO"
   }, self)
 end
 
 ---@return boolean
 function Todo:is_complete()
-  return not self.type and self.type == 'DONE'
+  return self.type and self.type == "DONE"
 end
 
 ---@param s string?
@@ -59,6 +59,19 @@ function Todo.from_lines(lines)
 
   -- Filter out nil values
   return vim.tbl_filter(function(v) return v ~= nil end, todos)
+end
+
+--- Gets the todo text from the line
+---@param line string
+---@return string? sanitized_todo
+function Todo.sanitize_todo_line(line)
+  local type = line:match("(%a%a%a%a)%s-:")
+  local _, pos = line:find(":")
+  if not pos then
+    return nil
+  end
+  local title = line:sub(pos + 1)
+  return type .. ": " .. title
 end
 
 return Todo
