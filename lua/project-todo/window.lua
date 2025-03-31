@@ -2,6 +2,7 @@
 ---@field opts vim.api.keyset.win_config
 ---@field buf_id integer
 ---@field win_id integer
+---@field showing_help boolean
 local Window = {}
 Window.__index = Window
 
@@ -26,8 +27,9 @@ end
 function Window:new(settings, opts)
   return setmetatable({
     buf_id = nil,
-    opts = opts or self:default_opts(settings),
     win_id = nil,
+    opts = opts or self:default_opts(settings),
+    showing_help = false
   }, self)
 end
 
@@ -38,7 +40,8 @@ function Window:open()
   self.buf_id = vim.api.nvim_create_buf(false, true) -- No file, scratch buffer
   self.win_id = vim.api.nvim_open_win(self.buf_id, true, self.opts)
 
-  vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = self.buf_id })
+  -- We want the buffer to stay loaded if it is hidden (the help buffer)
+  vim.api.nvim_set_option_value("bufhidden", "hide", { buf = self.buf_id })
   vim.api.nvim_set_option_value("buftype", "nofile", { buf = self.buf_id })
   vim.api.nvim_set_option_value("filetype", "project-todo", { buf = self.buf_id })
 
@@ -70,17 +73,23 @@ function Window:is_closed()
   return not self:is_open()
 end
 
+---@param lines string[]
+function Window:set_text(lines)
+  ---@type string[]
+  vim.api.nvim_buf_set_lines(self.buf_id, 0, -1, true, lines)
+end
+
 --- Adds todo items to the given buffer
 ---@param todos project-todo.todo_data[]
 function Window:populate_todos(todos)
   ---@param todo project-todo.todo_data
   ---@return string? line
   local function to_line(todo)
-      return todo.type .. ": " .. todo.title
+    return todo.type .. ": " .. todo.title
   end
 
-  ---@type string[]
-  vim.api.nvim_buf_set_lines(self.buf_id, 0, -1, true, vim.tbl_map(to_line, todos))
+  local lines = vim.tbl_map(to_line, todos)
+  self:set_text(lines)
 end
 
 ---Will read and return all current items in the window's buffer

@@ -22,6 +22,9 @@ vim.api.nvim_create_user_command("ProjectTodo",
   ---@param args project-todo.vim.user_command
   function(args)
     local action = args.fargs[1] or "incomplete"
+    -- TODO: support the type of window in the actual window object so we can
+    -- know whether the window type is complete or incomplete when user toggles
+    -- so we can know how to save
     if action == "comment" then
       app:write_current_line_to_scope()
       return

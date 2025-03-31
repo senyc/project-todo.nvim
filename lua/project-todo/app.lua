@@ -2,6 +2,7 @@ local Todo = require "project-todo.todo"
 local Settings = require "project-todo.settings"
 local Path = require "project-todo.path"
 local State = require "project-todo.state"
+local Help = require 'project-todo.help'
 
 ---@class project-todo.app
 ---@field settings project-todo.settings
@@ -108,7 +109,7 @@ function App:register_window(window, type)
   })
 
   -- On close, save the buffer contents to state
-  vim.api.nvim_create_autocmd({ "BufLeave" }, {
+  vim.api.nvim_create_autocmd({ "QuitPre" }, {
     buffer = window.buf_id,
     callback = function()
       if type == "incomplete" then
@@ -119,6 +120,11 @@ function App:register_window(window, type)
       window:release()
     end
   })
+
+  vim.keymap.set("n", "g?", function()
+    local help = Help.get()
+    help:display_help_in_window(window.win_id, window.buf_id)
+  end, { buffer = window.buf_id, desc = "Toggle help" })
 end
 
 ---This will populate the given window with state
