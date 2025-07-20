@@ -18,6 +18,10 @@ local App = require "project-todo.app"
 local app = App.get()
 local win = Window:new(app.settings)
 
+local function project_todo_complete(arg_lead, cmd_line, cursor_pos)
+  return { "incomplete", "complete", "count" }
+end
+
 vim.api.nvim_create_user_command("ProjectTodo",
   ---@param args project-todo.vim.user_command
   function(args)
@@ -42,4 +46,7 @@ vim.api.nvim_create_user_command("ProjectTodo",
     win:open()
     app:register_window(win, action)
     app:populate_window(win, action == "complete")
-  end, { nargs = "*" })
+  end, {
+    nargs = "*",
+    complete = project_todo_complete
+  })
