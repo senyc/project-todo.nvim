@@ -29,6 +29,10 @@ vim.api.nvim_create_user_command("ProjectTodo",
       app:write_current_line_to_scope()
       return
     end
+    if action == "count" then
+      vim.print(app:get_total_tasks())
+      return
+    end
     if win:is_open() then
       -- This also runs the buf close aucmds
       win:close()

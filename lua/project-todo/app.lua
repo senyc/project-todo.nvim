@@ -170,4 +170,11 @@ function App:write_current_line_to_scope()
   vim.api.nvim_del_current_line()
 end
 
+--- This will return the current amount of tasks in the current scope (for use in lualine, etc)
+---@return string
+function App:get_total_tasks()
+  local tasks, _ =  self.state:get(self:get_scope())
+  return tostring(#tasks)
+end
+
 return App
