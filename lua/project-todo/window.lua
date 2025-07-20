@@ -2,22 +2,22 @@
 ---@field opts vim.api.keyset.win_config
 ---@field buf_id integer
 ---@field win_id integer
+---@field settings project-todo.settings
 ---@field showing_help boolean
 local Window = {}
 Window.__index = Window
 
 --- Gets default win options to keep the screen centered
 ---@return vim.api.keyset.win_config
----@param settings project-todo.settings
-function Window:default_opts(settings)
+function Window:get_default_opts()
   return {
     style = "minimal",
     relative = "editor",
-    width = settings.width,
-    height = settings.height,
-    row = (vim.o.lines - settings.height) / 2,  -- Center vertically
-    col = (vim.o.columns - settings.width) / 2, -- Center horizontally
+    width = self.settings.width,
+    height = self.settings.height,
     border = "rounded",
+    row = (vim.o.lines - self.settings.height) / 2,
+    col = (vim.o.columns - self.settings.width) / 2,
   }
 end
 
@@ -25,12 +25,18 @@ end
 ---@param opts? vim.api.keyset.win_config
 ---@return project-todo.window
 function Window:new(settings, opts)
-  return setmetatable({
+  -- If the user passed on options we need to generate them after creating the initial table
+  local win = setmetatable({
     buf_id = nil,
     win_id = nil,
-    opts = opts or self:default_opts(settings),
-    showing_help = false
+    opts = opts,
+    showing_help = false,
+    settings = settings,
   }, self)
+  if win.opts == nil then
+    win.opts = win:get_default_opts()
+  end
+  return win
 end
 
 function Window:open()
@@ -38,7 +44,12 @@ function Window:open()
     return
   end
   self.buf_id = vim.api.nvim_create_buf(false, true) -- No file, scratch buffer
-  self.win_id = vim.api.nvim_open_win(self.buf_id, true, self.opts)
+  local centered_opts = self.opts
+  -- Always center the window on open
+  centered_opts.row = (vim.o.lines - self.settings.height) / 2
+  centered_opts.col = (vim.o.columns - self.settings.width) / 2
+
+  self.win_id = vim.api.nvim_open_win(self.buf_id, true, centered_opts)
 
   -- We want the buffer to stay loaded if it is hidden (the help buffer)
   vim.api.nvim_set_option_value("bufhidden", "hide", { buf = self.buf_id })

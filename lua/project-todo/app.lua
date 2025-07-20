@@ -13,7 +13,6 @@ App.__index = App
 --- Application singleton
 ---@type project-todo.app
 local app
-
 ---Returns application singleton or creates one if one doesn't already exist
 ---@return project-todo.app
 function App.get()
@@ -103,8 +102,7 @@ function App:register_window(window, type)
   vim.api.nvim_create_autocmd({ "VimResized" }, {
     buffer = window.buf_id,
     callback = function()
-      local win_opts = window:default_opts(self.settings)
-      vim.api.nvim_win_set_config(window.win_id, win_opts)
+      vim.api.nvim_win_set_config(window.win_id, window:get_default_opts())
     end,
   })
 

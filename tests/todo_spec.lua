@@ -7,7 +7,6 @@ describe("Todo management", function()
   before_each(function()
     todo = Todo:new("Test task", "TODO")
   end)
-
   describe("#new", function()
     it("should create a todo with title and type", function()
       assert.is_not_nil(todo)

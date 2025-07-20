@@ -26,7 +26,7 @@ describe("Path.encode", function()
       local expected = "My%20Documents%2Ffile%2Fname"
       assert.equal(expected, Path.encode(input))
     end)
-    it("It should hanle regular path names", function()
+    it("It should handle regular path names", function()
       local input = "/home/user/projects/myproject"
       local expected = "%2Fhome%2Fuser%2Fprojects%2Fmyproject"
       assert.equal(expected, Path.encode(input))

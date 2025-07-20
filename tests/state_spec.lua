@@ -3,7 +3,6 @@ local Settings = require("project-todo.settings")
 local Todo = require("project-todo.todo")
 
 local save_dir = "./tmp"
-
 describe("State", function()
   local settings
 
